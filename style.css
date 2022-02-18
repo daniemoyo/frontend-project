@@ -26,8 +26,12 @@ body{
     margin: auto;
 
 }
+.accordion{
+    margin-top: 20px;
+}
 
 
+/* flexisel  */
 .clearout {
     height:20px;
     clear:both;

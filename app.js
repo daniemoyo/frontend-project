@@ -1,12 +1,11 @@
 const $assetsImg = $("#accordionExample");
-
-
 const $options = $("#options");
 const $select = $(`<select name="asset" class="form-control" id="assetId"></select>`);
 const $modalBody = $('#myModal');
 let assetsObj = {};
 
-$("#accordionExample").hide();
+// accordion
+// $("#accordionExample").hide();
 $("#myInput").on("keyup", function() {
     var value = this.value.toLowerCase().trim();
     $("#accordionExample").show();
@@ -15,6 +14,17 @@ $("#myInput").on("keyup", function() {
     }).hide();
   });
 
+// formatter
+var formatter = new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+  
+    // These options are needed to round to whole numbers if that's what you want.
+    //minimumFractionDigits: 0, // (this suffices for whole numbers, but will print 2500.10 as $2,500.1)
+    //maximumFractionDigits: 0, // (causes 2500.99 to be printed as $2,501)
+  });
+
+// flexisel
   $("#myCarousel").flexisel({
     visibleItems: 4,
     itemsToScroll: 1,
@@ -23,7 +33,7 @@ $("#myInput").on("keyup", function() {
     navigationTargetSelector: null,
     autoPlay: {
         enable: true,
-        interval: 1000,
+        interval: 5000,
         pauseOnHover: true
     },
     responsiveBreakpoints: { 
@@ -46,39 +56,28 @@ $("#myInput").on("keyup", function() {
 
 });
 
-  
+// accordion creation 
 
-//   surge --domain painful-winter.surge.sh .
 const assets =  () =>{
  
     $.get('https://api.coincap.io/v2/assets/', (data) =>{
         assetsObj = data;
             console.log(data);
-        for (let i = 0; i < 6; i++) {
-            // const $div = $('<div></div>');
+        for (let i = 0; i < data.data.length; i++) {
             let id = data.data[i].id;
-            let name = data.data[i].name;
             let link = data.data[i].explorer;
-            // const $option = $(`<option value="${id}">${name}</option>`);
-            // $select.append($option);
+            let name = data.data[i].name;
+            let marketCap = formatter.format(parseFloat(data.data[i].marketCapUsd).toFixed(2));
+            let maxSupply = data.data[i].maxSupply;
+            let price = formatter.format(parseFloat(data.data[i].priceUsd).toFixed(2));
+            let rank = data.data[i].rank;
+            let volume = data.data[i].volumeUsd24Hr;
+            let change = parseFloat(data.data[i].changePercent24Hr).toFixed(2);
+
             let symbol = (data.data[i].symbol).toLowerCase();
             symbol === 'bttold'? symbol = 'btt' : symbol;
-            // const $img = $('<img class="assetImg">');
-            // $img.attr('src', `https://assets.coincap.io/assets/icons/${symbol}@2x.png`);
-            // $img.attr('id', id);
-            // $div1.attr('href', link);
-            // $div1.text(name);
-            
-            // $div1.append($img);
-            
-            // $options.append($select);
-            // $div.append($div1);
-            // $assetsImg.append($div);
-            // const $imgSlider = $("#myCarousel");
-            // const $li = $('<li></li>');
-            // const $img = $(`<img src="https://assets.coincap.io/assets/icons/btc@2x.png" />`);
-            // $img.appendTo($li);
-            // $li.appendTo($imgSlider);
+            symbol === 'bttold'? symbol = 'btt' : symbol;
+            change>0? color='green':color="red";
 
             $accord = $(`<div class="accordion-item">
                         <h2 class="accordion-header" id="heading${[i]}">
@@ -91,13 +90,33 @@ const assets =  () =>{
                             <div class="card mb-3" style="width: 100%;">
                                 <div class="row no-gutters">
                                     <div class="col-md-4" id="image">
-                                        <img  src="https://assets.coincap.io/assets/icons/${symbol}@2x.png" class="card-img" alt="...">
+                                    <a href="${link}"> <img  src="https://assets.coincap.io/assets/icons/${symbol}@2x.png" class="card-img" alt="..."></a>
+                                        
                                     </div>
                                     <div class="col-md-8">
                                         <div class="card-body">
-                                        <h5 class="card-title">${(id).toUpperCase()}</h5>
-                                        <p class="card-text">This is a wider card with supporting text below as a natural lead-in to additional content. This content is a little bit longer.</p>
-                                        <p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p>
+                                        <table class="table">
+                                            <tbody>
+                                                <tr>
+                                                <th>Price</th>
+                                                    <td>${price}</td>
+                                                </tr>
+                                                <tr>
+                                                <th>24hr Change</th>
+                                                    <td style="color:${color};">${change}%</td>
+                                                </tr>
+                                                <tr>
+                                                <tr>
+                                                <th>Rank</th>
+                                                    <td>${rank}</td>
+                                                </tr>
+                                                <tr>
+                                                <th>Market Cap</th>
+                                                    <td>${marketCap}</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                        <a href="${link}" class="btn btn-primary">More info on ${name}</a>
                                         </div>
                                     </div>
                                 </div>
@@ -106,10 +125,10 @@ const assets =  () =>{
                     </div>
                 </div> `);
             $assetsImg.append($accord);
-           
         }
            
     });
+
 }
 
 assets();
